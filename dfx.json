@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "mentalCompanion_backend": {
+      "main": "src/mentalCompanion_backend/main.mo",
+      "type": "motoko"
+    },
+    "mentalCompanion_frontend": {
+      "dependencies": [
+        "mentalCompanion_backend"
+      ],
+      "source": [
+        "src/mentalCompanion_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "mentalCompanion_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
