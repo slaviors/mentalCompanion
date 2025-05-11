@@ -22,5 +22,8 @@
     }
   },
   "output_env_file": ".env",
-  "version": 1
+  "version": 1,
+  "canister_http": {
+    "enabled": true
+  }
 }
