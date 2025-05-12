@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { AuthClient } from '@dfinity/auth-client';
 import { Actor, HttpAgent } from '@dfinity/agent';
-import { idlFactory } from '../../../declarations/backend/index';
+// Import yang sudah diperbarui
+import { idlFactory } from '../../../declarations/mentalCompanion_backend/index';
 
 const AuthContext = createContext();
 
@@ -73,7 +74,7 @@ export function AuthProvider({ children }) {
 
     const actor = Actor.createActor(idlFactory, {
       agent,
-      canisterId: process.env.BACKEND_CANISTER_ID,
+      canisterId: process.env.MENTALCOMPANION_BACKEND_CANISTER_ID || "v3x57-gaaaa-aaaab-qadmq-cai",
     });
     
     setActor(actor);

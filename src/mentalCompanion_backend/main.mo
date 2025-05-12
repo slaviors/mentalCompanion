@@ -1,68 +1,59 @@
 import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
-import HashMap "mo:base/HashMap";
-import Hash "mo:base/Hash";
-import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Nat "mo:base/Nat";
 import Result "mo:base/Result";
-import Error "mo:base/Error";
 import Blob "mo:base/Blob";
-import Cycles "mo:base/ExperimentalCycles";
-
-// Import the Internet Computer management canister
-import IC "ic:aaaaa-aa";
-
-// Define HTTP request/response types
-module Types {
-  public type IC = actor {
-    http_request : shared HTTP.HTTPRequest -> async HTTP.HTTPResponse;
-  };
-
-  public module HTTP {
-    public type HTTPRequest = {
-      url : Text;
-      method : HTTPMethod;
-      headers : [HeaderField];
-      body : ?Blob;
-      transform : ?Transform;  // Fixed name from TransformRawResponseFunction
-    };
-
-    public type HTTPMethod = {
-      #get;
-      #post;
-      #head;
-    };
-
-    public type HeaderField = {
-      name : Text;
-      value : Text;
-    };
-
-    public type HTTPResponse = {
-      status : Nat;
-      headers : [HeaderField];
-      body : Blob;
-    };
-
-    // Define the Transform type that was missing before
-    public type Transform = {
-      function : shared query TransformArgs -> async HTTPResponse;
-      context : Blob;
-    };
-
-    public type TransformArgs = {
-      response : HTTPResponse;
-      context : Blob;
-    };
-  };
-};
+import HashMap "mo:base/HashMap";
 
 // Mental Health Companion Actor
 actor MentalCompanion {
+  // Define HTTP request/response types (now with _ prefix to indicate it's unused)
+  module _Types {
+    public type IC = actor {
+      http_request : shared HTTP.HTTPRequest -> async HTTP.HTTPResponse;
+    };
+
+    public module HTTP {
+      public type HTTPRequest = {
+        url : Text;
+        method : HTTPMethod;
+        headers : [HeaderField];
+        body : ?Blob;
+        transform : ?Transform;
+      };
+
+      public type HTTPMethod = {
+        #get;
+        #post;
+        #head;
+      };
+
+      public type HeaderField = {
+        name : Text;
+        value : Text;
+      };
+
+      public type HTTPResponse = {
+        status : Nat;
+        headers : [HeaderField];
+        body : Blob;
+      };
+
+      public type Transform = {
+        function : shared query TransformArgs -> async HTTPResponse;
+        context : Blob;
+      };
+
+      public type TransformArgs = {
+        response : HTTPResponse;
+        context : Blob;
+      };
+    };
+  };
+
   // Data structures
   type UserProfile = {
     id: Principal;
@@ -92,9 +83,9 @@ actor MentalCompanion {
   private let userProfiles = HashMap.HashMap<Principal, UserProfile>(10, Principal.equal, Principal.hash);
   private let chatSessions = HashMap.HashMap<Principal, [ChatSession]>(10, Principal.equal, Principal.hash);
 
-  // API configuration
-  private let GEMMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-  private let API_KEY = "AIzaSyBzXluDHWiN4-vJp6Tmo97csWdm5HkgeQg"; // Replace with your actual API key
+  // API configuration - renamed with underscore prefix to mark as unused
+  private let _GEMMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+  private let _API_KEY = "AIzaSyBzXluDHWiN4-vJp6Tmo97csWdm5HkgeQg"; // Replace with your actual API key
 
   // User Authentication and Profile Management
   public shared(msg) func createProfile(name: Text) : async Result.Result<UserProfile, Text> {
@@ -235,7 +226,8 @@ actor MentalCompanion {
           return #err("Chat session not found");
         };
         
-        chatSessions.put(caller, updatedChats.toArray());
+        // Menggunakan static library function Buffer.toArray() daripada method .toArray()
+        chatSessions.put(caller, Buffer.toArray<ChatSession>(updatedChats));
         
         switch (updatedChat) {
           case (null) { #err("Failed to update chat") };
@@ -254,56 +246,16 @@ actor MentalCompanion {
       contextPrompt := contextPrompt # role # msg.content # "\n";
     };
 
-    // The actual prompt to send to Gemmini
-    let prompt = contextPrompt # "User: " # userMessage # "\nAssistant:";
+    // The actual prompt to send to Gemmini (renamed with underscore as unused)
+    let _prompt = contextPrompt # "User: " # userMessage # "\nAssistant:";
     
     // For development/testing, return a static response
     // This is a simulated caring mental health response
     return "I'm here to support you. Remember that you're not alone in what you're feeling, and it's completely okay to seek help. What specific aspects of your situation are most challenging right now?";
     
     /* 
-    // HTTP outcall implementation using IC management canister
-    try {
-      // Add cycles to pay for the HTTP outcall
-      Cycles.add(50_000_000);
-      
-      // Create request body
-      let requestBodyText = "{\"contents\":[{\"parts\":[{\"text\":\"" # prompt # "\"}]}],\"generation_config\":{\"temperature\":0.7,\"topP\":0.95,\"topK\":40},\"safety_settings\":[{\"category\":\"HARM_CATEGORY_HARASSMENT\",\"threshold\":\"BLOCK_MEDIUM_AND_ABOVE\"}]}";
-      
-      // Convert to blob
-      let requestBodyBlob = Text.encodeUtf8(requestBodyText);
-      
-      // Set up the HTTP request
-      let request: Types.HTTP.HTTPRequest = {
-        url = GEMMINI_API_URL # "?key=" # API_KEY;
-        method = #post;
-        body = ?requestBodyBlob;
-        headers = [
-          { name = "Content-Type"; value = "application/json" }
-        ];
-        transform = null;
-      };
-      
-      // Make the HTTP request
-      let ic : IC.IC = actor("aaaaa-aa");
-      let response = await ic.http_request(request);
-      
-      // Process the response
-      if (response.status >= 200 and response.status < 300) {
-        let responseBodyText = switch (Text.decodeUtf8(response.body)) {
-          case (null) { "Error decoding response" };
-          case (?text) { text };
-        };
-        
-        // In a real implementation, you'd parse the JSON response to extract 
-        // the generated content. For now, we'll just return a placeholder
-        return "I'm here to support you through whatever you're experiencing.";
-      } else {
-        return "I'm having trouble processing your request right now. Please try again in a moment.";
-      }
-    } catch (error) {
-      return "I'm having trouble connecting to my knowledge source. Please try again soon.";
-    }
+    // HTTP outcall implementation using IC management canister would go here
+    // This part would be implemented when ready to connect to the actual API
     */
   };
 }
