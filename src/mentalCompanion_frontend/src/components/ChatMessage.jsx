@@ -2,8 +2,22 @@ import React from 'react';
 
 export default function ChatMessage({ message }) {
   const isUser = message.isUser;
-  const timestamp = new Date(Number(message.timestamp) / 1000000);
-  const formattedTime = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  // Fungsi helper untuk mengkonversi timestamp BigInt dari nanosekon menjadi format waktu yang dibaca manusia
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    
+    try {
+      // Konversi BigInt ke number dengan membagi dengan 1_000_000 (nanosekon ke milisekon)
+      const timestampMs = Number(timestamp.toString()) / 1_000_000;
+      return new Date(timestampMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      console.error('Error formatting timestamp:', error);
+      return '';
+    }
+  };
+  
+  const formattedTime = formatTimestamp(message.timestamp);
   
   // Detect URLs in text to make them clickable
   const formatMessageContent = (content) => {
@@ -105,7 +119,7 @@ export default function ChatMessage({ message }) {
       {/* Avatar for user messages */}
       {isUser && (
         <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex-shrink-0 ml-2 flex items-center justify-center text-sm font-medium text-gray-700">
-          {/* You can replace this with the user's initial or profile picture */}
+          {/* Anda bisa ganti ini dengan inisial pengguna atau foto profil */}
           U
         </div>
       )}
