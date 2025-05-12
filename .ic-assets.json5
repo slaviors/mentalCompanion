@@ -1,0 +1,9 @@
+[
+  {
+    "match": "**/*",
+    "headers": {
+      "Content-Security-Policy": "default-src 'self'; connect-src 'self' https://ic0.app https://icp0.io https://*.icp0.io https://icp-api.io https://identity.ic0.app; img-src 'self' data: https://*.unsplash.com https://unsplash.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; upgrade-insecure-requests;",
+      "X-Content-Type-Options": "nosniff"
+    }
+  }
+]

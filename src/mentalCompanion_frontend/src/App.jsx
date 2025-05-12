@@ -1,79 +1,143 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import Login from './pages/Login';
-import ChatList from './pages/ChatList';
-import ChatPage from './pages/ChatPage';
-import CreateProfile from './pages/CreateProfile';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Welcome from './pages/Welcome';
+import Login from './pages/Login';
+import CreateProfile from './pages/CreateProfile';
+import ChatList from './pages/ChatList'; // Perhatikan perubahan dari Chats ke ChatList
+import ChatPage from './pages/ChatPage'; // Menggunakan ChatPage
+import Settings from './pages/Settings'; // Tambahkan import untuk Settings
 
-function ProtectedRoute({ children }) {
+// Route protector component
+const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, userProfile } = useAuth();
-
+  
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
-
+  
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
-
-  if (isAuthenticated && !userProfile) {
-    return <Navigate to="/create-profile" />;
+  
+  // Jika belum punya profil dan tidak berada di halaman create profile
+  if (!userProfile && window.location.pathname !== '/create-profile') {
+    return <Navigate to="/create-profile" replace />;
   }
-
+  
   return children;
-}
+};
 
-function App() {
+// Profile route protector (hanya untuk yang belum punya profil)
+const ProfileRoute = ({ children }) => {
   const { isAuthenticated, isLoading, userProfile } = useAuth();
-
+  
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Jika sudah punya profil, redirect ke chats
+  if (userProfile) {
+    return <Navigate to="/chats" replace />;
+  }
+  
+  return children;
+};
 
+// Authentication route (hanya untuk yang belum login)
+const AuthRoute = ({ children }) => {
+  const { isAuthenticated, isLoading, userProfile } = useAuth();
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+  
+  if (isAuthenticated) {
+    // Jika belum punya profil, arahkan ke create profile
+    if (!userProfile) {
+      return <Navigate to="/create-profile" replace />;
+    }
+    // Jika sudah punya profil, arahkan ke chats
+    return <Navigate to="/chats" replace />;
+  }
+  
+  return children;
+};
+
+function AppContent() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={
-          isAuthenticated && userProfile ? <Navigate to="/chats" /> : <Login />
-        } />
+        <Route path="/" element={<Welcome />} />
         
-        <Route path="/create-profile" element={
-          !isAuthenticated ? <Navigate to="/login" /> :
-          userProfile ? <Navigate to="/chats" /> :
-          <CreateProfile />
-        } />
+        <Route 
+          path="/login" 
+          element={
+            <AuthRoute>
+              <Login />
+            </AuthRoute>
+          } 
+        />
         
-        <Route path="/" element={
-          isAuthenticated && userProfile ? <Navigate to="/chats" /> : <Welcome />
-        } />
+        <Route 
+          path="/create-profile" 
+          element={
+            <ProfileRoute>
+              <CreateProfile />
+            </ProfileRoute>
+          } 
+        />
         
-        <Route path="/chats" element={
-          <ProtectedRoute>
-            <Layout>
-              <ChatList />
-            </Layout>
-          </ProtectedRoute>
-        } />
+        <Route 
+          path="/chats" 
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ChatList />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
         
-        <Route path="/chat/:chatId" element={
-          <ProtectedRoute>
-            <Layout>
-              <ChatPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
+        <Route 
+          path="/chat/:chatId" 
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ChatPage />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/settings" 
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Settings />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Fallback route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
