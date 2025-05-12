@@ -14,5 +14,8 @@
   "type": "module",
   "workspaces": [
     "src/mentalCompanion_frontend"
-  ]
+  ],
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.10"
+  }
 }

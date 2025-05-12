@@ -6,24 +6,45 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login, isAuthenticated, userProfile } = useAuth();
+  const { login, isAuthenticated, userProfile, isPlayground, loginError } = useAuth();
 
   // Animation states
   const [animationProgress, setAnimationProgress] = useState(0);
+  const [leafGrowth, setLeafGrowth] = useState(0);
+  const [pulseEffect, setPulseEffect] = useState(1);
 
   // Start animation when component mounts
   useEffect(() => {
-    const interval = setInterval(() => {
+    const progressInterval = setInterval(() => {
       setAnimationProgress(prev => {
         if (prev >= 100) {
-          clearInterval(interval);
+          clearInterval(progressInterval);
           return 100;
         }
-        return prev + 1;
+        return prev + 0.5;
       });
     }, 30);
     
-    return () => clearInterval(interval);
+    const leafInterval = setInterval(() => {
+      setLeafGrowth(prev => {
+        if (prev >= 100) {
+          clearInterval(leafInterval);
+          return 100;
+        }
+        return prev + 0.3;
+      });
+    }, 40);
+    
+    // Heart pulse animation
+    const pulseInterval = setInterval(() => {
+      setPulseEffect(prev => (prev === 1 ? 1.05 : 1));
+    }, 1000);
+    
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(leafInterval);
+      clearInterval(pulseInterval);
+    };
   }, []);
 
   // If authenticated and has profile, redirect to /chats
@@ -40,6 +61,7 @@ function Login() {
 
     try {
       await login();
+      // Login process is handled by AuthContext including success callbacks
     } catch (err) {
       console.error('Login error:', err);
       setError('Failed to authenticate. Please try again.');
@@ -92,8 +114,11 @@ function Login() {
             {/* Heart in the middle */}
             <svg 
               viewBox="0 0 100 100" 
-              className="absolute inset-0 w-full h-full"
-              style={{ opacity: animationProgress / 100 }}
+              className="absolute inset-0 w-full h-full transition-transform duration-1000"
+              style={{ 
+                opacity: animationProgress / 100,
+                transform: `scale(${pulseEffect})`
+              }}
             >
               <path 
                 d="M50,30 C35,10 10,20 10,40 C10,60 30,70 50,90 C70,70 90,60 90,40 C90,20 65,10 50,30 Z" 
@@ -115,17 +140,105 @@ function Login() {
             <svg 
               viewBox="0 0 100 100" 
               className="absolute inset-0 w-full h-full"
-              style={{ opacity: animationProgress > 50 ? (animationProgress - 50) / 50 : 0 }}
+              style={{ opacity: leafGrowth > 30 ? (leafGrowth - 30) / 70 : 0 }}
             >
+              {/* Right leaf */}
               <path 
-                d="M50,100 C60,85 65,75 55,60 C70,70 75,60 70,50 M50,100 C40,85 35,75 45,60 C30,70 25,60 30,50" 
+                d="M50,100 C60,85 65,75 55,60 C70,70 75,60 70,50" 
                 stroke="#68D391" 
                 strokeWidth="2"
                 fill="none"
                 strokeDasharray="100"
-                strokeDashoffset={100 - (Math.max(0, animationProgress - 50) / 50) * 100}
+                strokeDashoffset={100 - (Math.max(0, leafGrowth - 30) / 70) * 100}
                 className="transition-all duration-300 ease-out"
                 strokeLinecap="round"
+              />
+              
+              {/* Left leaf */}
+              <path 
+                d="M50,100 C40,85 35,75 45,60 C30,70 25,60 30,50" 
+                stroke="#68D391" 
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray="100"
+                strokeDashoffset={100 - (Math.max(0, leafGrowth - 40) / 60) * 100}
+                className="transition-all duration-300 ease-out"
+                strokeLinecap="round"
+              />
+              
+              {/* Small leaves */}
+              <path 
+                d="M46,65 C42,60 44,55 48,53" 
+                stroke="#68D391" 
+                strokeWidth="1.5"
+                fill="none"
+                strokeDasharray="20"
+                strokeDashoffset={20 - (Math.max(0, leafGrowth - 50) / 50) * 20}
+                className="transition-all duration-300 ease-out"
+                strokeLinecap="round"
+              />
+              
+              <path 
+                d="M54,65 C58,60 56,55 52,53" 
+                stroke="#68D391" 
+                strokeWidth="1.5"
+                fill="none"
+                strokeDasharray="20"
+                strokeDashoffset={20 - (Math.max(0, leafGrowth - 60) / 40) * 20}
+                className="transition-all duration-300 ease-out"
+                strokeLinecap="round"
+              />
+              
+              {/* Tiny dots for additional detail */}
+              <circle 
+                cx="40" 
+                cy="75" 
+                r="1.5" 
+                fill="#68D391"
+                style={{ opacity: Math.max(0, (leafGrowth - 70) / 30) }}
+              />
+              <circle 
+                cx="60" 
+                cy="75" 
+                r="1.5" 
+                fill="#68D391"
+                style={{ opacity: Math.max(0, (leafGrowth - 75) / 25) }}
+              />
+              <circle 
+                cx="45" 
+                cy="85" 
+                r="1.5" 
+                fill="#68D391"
+                style={{ opacity: Math.max(0, (leafGrowth - 80) / 20) }}
+              />
+              <circle 
+                cx="55" 
+                cy="85" 
+                r="1.5" 
+                fill="#68D391"
+                style={{ opacity: Math.max(0, (leafGrowth - 85) / 15) }}
+              />
+            </svg>
+            
+            {/* Ripple effect circles */}
+            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
+              <circle 
+                cx="50" 
+                cy="50" 
+                r={10 + (animationProgress * 0.2)} 
+                fill="none" 
+                stroke="#9F7AEA" 
+                strokeWidth="0.5"
+                opacity={animationProgress > 50 ? (100 - animationProgress) / 50 * 0.3 : 0}
+              />
+              <circle 
+                cx="50" 
+                cy="50" 
+                r={10 + (animationProgress * 0.35)} 
+                fill="none" 
+                stroke="#4FD1C5" 
+                strokeWidth="0.5"
+                opacity={animationProgress > 30 ? (100 - animationProgress) / 70 * 0.2 : 0}
               />
             </svg>
           </div>
@@ -141,7 +254,7 @@ function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white/80 backdrop-blur-sm py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-purple-100">
-          {error && (
+          {(error || loginError) && (
             <div className="mb-4 rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -151,7 +264,7 @@ function Login() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-red-800">
-                    {error}
+                    {error || loginError}
                   </h3>
                 </div>
               </div>
@@ -220,11 +333,14 @@ function Login() {
         </div>
       </div>
       
-      {/* Footer */}
-      <footer className="mt-12 text-center text-sm text-gray-500">
+      {/* Debug info - dapat dihapus di production */}
+      <div className="mt-8 text-center text-xs text-gray-500">
+        <p>Environment: {isPlayground ? 'Playground/Production' : 'Local Development'}</p>
+        <p>Identity Provider: {isPlayground ? 'https://identity.ic0.app' : 'http://localhost:4943/...'}</p>
+        <p>Current URL: {window.location.href}</p>
         <p>&copy; {new Date().getFullYear()} Mental Health Companion</p>
-        <p className="mt-1">Current date: {new Date('2025-05-12').toLocaleDateString()} | User: mamatqurtifa</p>
-      </footer>
+        <p className="mt-1">Current date: {new Date().toLocaleDateString()} | User: mamatqurtifa</p>
+      </div>
     </div>
   );
 }

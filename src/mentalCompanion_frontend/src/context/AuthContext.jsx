@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { AuthClient } from '@dfinity/auth-client';
 import { Actor, HttpAgent } from '@dfinity/agent';
-// Import yang sudah diperbarui
 import { idlFactory } from '../../../declarations/mentalCompanion_backend/index';
 
 const AuthContext = createContext();
@@ -17,6 +16,14 @@ export function AuthProvider({ children }) {
   const [actor, setActor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
+  const [loginError, setLoginError] = useState(null);
+
+  // PERBAIKAN: Deteksi environment dengan benar
+  const isPlayground = window.location.hostname !== 'localhost' && 
+                        window.location.hostname !== '127.0.0.1';
+  
+  // Backend canister ID - pastikan ini benar
+  const backendCanisterId = "v3x57-gaaaa-aaaab-qadmq-cai"; // Ganti jika berbeda
 
   useEffect(() => {
     async function initAuth() {
@@ -63,9 +70,14 @@ export function AuthProvider({ children }) {
   }
 
   function initActor(identity) {
-    const agent = new HttpAgent({ identity });
-    // When developing locally, we need to disable certificate verification
-    if (process.env.NODE_ENV !== 'production') {
+    const agent = new HttpAgent({ 
+      identity,
+      // PERBAIKAN: Set host hanya ketika di playground
+      host: isPlayground ? "https://icp0.io" : undefined
+    });
+    
+    // PERBAIKAN: Fetch root key hanya di lingkungan local
+    if (!isPlayground) {
       agent.fetchRootKey().catch(err => {
         console.warn("Unable to fetch root key. Check to ensure that your local replica is running");
         console.error(err);
@@ -74,7 +86,7 @@ export function AuthProvider({ children }) {
 
     const actor = Actor.createActor(idlFactory, {
       agent,
-      canisterId: process.env.MENTALCOMPANION_BACKEND_CANISTER_ID || "v3x57-gaaaa-aaaab-qadmq-cai",
+      canisterId: backendCanisterId,
     });
     
     setActor(actor);
@@ -83,18 +95,35 @@ export function AuthProvider({ children }) {
 
   async function login() {
     if (authClient) {
-      await authClient.login({
-        identityProvider: process.env.DFX_NETWORK === 'ic' 
-          ? 'https://identity.ic0.app'
-          : `http://localhost:4943/?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}`,
-        onSuccess: async () => {
-          setIsAuthenticated(true);
-          const identity = authClient.getIdentity();
-          setIdentity(identity);
-          const actor = initActor(identity);
-          setActor(actor);
-        },
-      });
+      setLoginError(null);
+      
+      try {
+        // PERBAIKAN UTAMA: Gunakan identityProvider yang benar berdasarkan environment
+        const identityProvider = isPlayground
+          ? "https://identity.ic0.app"  // Gunakan mainnet II untuk playground
+          : `http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai`;  // Local dev
+        
+        console.log("Environment:", isPlayground ? "Playground" : "Local");
+        console.log("Using Identity Provider:", identityProvider);
+        
+        await authClient.login({
+          identityProvider: identityProvider,
+          onSuccess: async () => {
+            setIsAuthenticated(true);
+            const identity = authClient.getIdentity();
+            setIdentity(identity);
+            const actor = initActor(identity);
+            setActor(actor);
+          },
+          onError: (error) => {
+            console.error("Login failed:", error);
+            setLoginError("Failed to authenticate. Please try again.");
+          }
+        });
+      } catch (error) {
+        console.error("Login error:", error);
+        setLoginError("An unexpected error occurred. Please try again.");
+      }
     }
   }
 
@@ -133,6 +162,8 @@ export function AuthProvider({ children }) {
     actor,
     userProfile,
     createProfile,
+    loginError,
+    isPlayground
   };
 
   return (
