@@ -1,30 +1,79 @@
-import { useState } from 'react';
-import { mentalCompanion_backend } from 'declarations/mentalCompanion_backend';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Login from './pages/Login';
+import ChatList from './pages/ChatList';
+import ChatPage from './pages/ChatPage';
+import CreateProfile from './pages/CreateProfile';
+import Layout from './components/Layout';
+import Welcome from './pages/Welcome';
+
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading, userProfile } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  if (isAuthenticated && !userProfile) {
+    return <Navigate to="/create-profile" />;
+  }
+
+  return children;
+}
 
 function App() {
-  const [greeting, setGreeting] = useState('');
+  const { isAuthenticated, isLoading, userProfile } = useAuth();
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    mentalCompanion_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
   }
 
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+    <Router>
+      <Routes>
+        <Route path="/login" element={
+          isAuthenticated && userProfile ? <Navigate to="/chats" /> : <Login />
+        } />
+        
+        <Route path="/create-profile" element={
+          !isAuthenticated ? <Navigate to="/login" /> :
+          userProfile ? <Navigate to="/chats" /> :
+          <CreateProfile />
+        } />
+        
+        <Route path="/" element={
+          isAuthenticated && userProfile ? <Navigate to="/chats" /> : <Welcome />
+        } />
+        
+        <Route path="/chats" element={
+          <ProtectedRoute>
+            <Layout>
+              <ChatList />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/chat/:chatId" element={
+          <ProtectedRoute>
+            <Layout>
+              <ChatPage />
+            </Layout>
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </Router>
   );
 }
 

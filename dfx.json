@@ -2,15 +2,13 @@
   "canisters": {
     "mentalCompanion_backend": {
       "main": "src/mentalCompanion_backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": [],
+      "candid": "src/mentalCompanion_backend/main.did"
     },
     "mentalCompanion_frontend": {
-      "dependencies": [
-        "mentalCompanion_backend"
-      ],
-      "source": [
-        "src/mentalCompanion_frontend/dist"
-      ],
+      "dependencies": ["mentalCompanion_backend"],
+      "source": ["src/mentalCompanion_frontend/dist"],
       "type": "assets",
       "workspace": "mentalCompanion_frontend"
     }
@@ -19,6 +17,12 @@
     "build": {
       "args": "",
       "packtool": ""
+    },
+    "networks": {
+      "local": {
+        "bind": "127.0.0.1:8000",
+        "type": "ephemeral"
+      }
     }
   },
   "output_env_file": ".env",
