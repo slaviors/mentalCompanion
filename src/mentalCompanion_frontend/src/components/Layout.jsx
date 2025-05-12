@@ -7,7 +7,6 @@ export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [theme, setTheme] = useState('light');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,28 +28,6 @@ export default function Layout({ children }) {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
-
-  // Toggle theme functionality (light/dark)
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', newTheme);
-  };
-
-  // Check for saved theme preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -85,14 +62,14 @@ export default function Layout({ children }) {
   ];
 
   return (
-    <div className={`flex h-screen flex-col ${theme === 'dark' ? 'dark:bg-gray-900 dark:text-white' : ''}`}>
+    <div className="flex h-screen flex-col bg-white">
       {/* Top Navigation Bar */}
       <header 
         className={`
           sticky top-0 z-40 transition-all duration-300 backdrop-blur-sm
           ${scrolled 
-            ? 'bg-white/90 dark:bg-gray-900/90 shadow-md' 
-            : 'bg-white dark:bg-gray-900'}
+            ? 'bg-white/90 shadow-md' 
+            : 'bg-white'}
         `}
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -129,7 +106,7 @@ export default function Layout({ children }) {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500 dark:hover:bg-gray-800"
+                className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500"
               >
                 <span className="sr-only">Open main menu</span>
                 {isMobileMenuOpen ? (
@@ -152,8 +129,8 @@ export default function Layout({ children }) {
                   to={item.path}
                   className={`px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors
                     ${isActive(item.path) 
-                      ? 'bg-gradient-to-r from-teal-500/10 to-purple-500/10 text-teal-600 dark:text-teal-400' 
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/40'}`}
+                      ? 'bg-gradient-to-r from-teal-500/10 to-purple-500/10 text-teal-600' 
+                      : 'text-gray-600 hover:bg-gray-100'}`}
                 >
                   <svg 
                     className={`mr-1.5 h-5 w-5 ${isActive(item.path) ? 'text-teal-500' : 'text-gray-400'}`} 
@@ -168,32 +145,15 @@ export default function Layout({ children }) {
                 </Link>
               ))}
 
-              {/* Theme toggle button */}
-              <button 
-                onClick={toggleTheme}
-                className="ml-2 p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/60 transition-colors"
-                aria-label="Toggle dark mode"
-              >
-                {theme === 'dark' ? (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                  </svg>
-                )}
-              </button>
-
               {/* Profile dropdown */}
               {isAuthenticated && userProfile ? (
                 <div className="relative ml-3">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:bg-gray-700"
+                    className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                   >
                     <span className="sr-only">Open user menu</span>
-                    {/* Profile avatar - you can replace with an actual image if available */}
+                    {/* Profile avatar */}
                     <div className="h-8 w-8 rounded-full bg-gradient-to-r from-teal-400 to-purple-500 flex items-center justify-center text-white font-semibold">
                       {userProfile.name ? userProfile.name[0].toUpperCase() : 'U'}
                     </div>
@@ -201,16 +161,16 @@ export default function Layout({ children }) {
 
                   {/* Dropdown menu */}
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700">
-                      <div className="px-4 py-2 text-sm text-gray-700 border-b dark:text-gray-200 dark:border-gray-700">
-                        <p className="font-medium text-gray-900 dark:text-white">{userProfile.name}</p>
-                        <p className="truncate text-gray-500 dark:text-gray-400 text-xs mt-0.5">Member since {new Date(userProfile.createdAt).toLocaleDateString()}</p>
+                    <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                        <p className="font-medium text-gray-900">{userProfile.name}</p>
+                        <p className="truncate text-gray-500 text-xs mt-0.5">Member since {new Date(userProfile.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Your Profile</Link>
-                      <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Settings</Link>
+                      <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</Link>
+                      <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Sign out
                       </button>
@@ -221,7 +181,7 @@ export default function Layout({ children }) {
                 <div className="flex items-center space-x-3">
                   <Link
                     to="/login"
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium dark:text-gray-300 dark:hover:text-white"
+                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Log in
                   </Link>
@@ -247,8 +207,8 @@ export default function Layout({ children }) {
                   to={item.path}
                   className={`block border-l-4 py-2 pl-3 pr-4 text-base font-medium ${
                     isActive(item.path)
-                      ? 'border-teal-500 bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-300'
-                      : 'border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/30'
+                      ? 'border-teal-500 bg-teal-50 text-teal-700'
+                      : 'border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-center">
@@ -268,7 +228,7 @@ export default function Layout({ children }) {
             </div>
 
             {isAuthenticated && userProfile ? (
-              <div className="border-t border-gray-200 pb-3 pt-4 dark:border-gray-700">
+              <div className="border-t border-gray-200 pb-3 pt-4">
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
                     <div className="h-10 w-10 rounded-full bg-gradient-to-r from-teal-400 to-purple-500 flex items-center justify-center text-white font-semibold">
@@ -276,49 +236,35 @@ export default function Layout({ children }) {
                     </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800 dark:text-white">{userProfile.name}</div>
+                    <div className="text-base font-medium text-gray-800">{userProfile.name}</div>
                   </div>
-                  <button 
-                    onClick={toggleTheme}
-                    className="ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 dark:bg-gray-800 dark:text-gray-300"
-                  >
-                    {theme === 'dark' ? (
-                      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                      </svg>
-                    )}
-                  </button>
                 </div>
                 <div className="mt-3 space-y-1">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                   >
                     Your Profile
                   </Link>
                   <Link
                     to="/settings"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                   >
                     Settings
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                   >
                     Sign out
                   </button>
                 </div>
               </div>
             ) : !isLoading && !isAuthenticated ? (
-              <div className="border-t border-gray-200 py-3 px-4 flex flex-col space-y-2 dark:border-gray-700">
+              <div className="border-t border-gray-200 py-3 px-4 flex flex-col space-y-2">
                 <Link
                   to="/login"
-                  className="block text-center w-full px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 rounded-md dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="block text-center w-full px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 rounded-md"
                 >
                   Log in
                 </Link>
@@ -335,7 +281,7 @@ export default function Layout({ children }) {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto bg-gray-50">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="w-16 h-16 relative">
@@ -353,9 +299,9 @@ export default function Layout({ children }) {
 
       {/* Footer - Only visible on larger screens or specific pages */}
       {(location.pathname === '/' || location.pathname === '/resources') && (
-        <footer className="bg-white border-t border-gray-200 py-4 px-6 dark:bg-gray-900 dark:border-gray-700">
+        <footer className="bg-white border-t border-gray-200 py-4 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
-            <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-1 text-sm text-gray-500">
               <span>© {new Date().getFullYear()} Mental Health Companion</span>
               <span>•</span>
               <span>Current User: mamatqurtifa</span>
