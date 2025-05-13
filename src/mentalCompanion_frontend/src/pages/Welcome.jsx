@@ -900,7 +900,7 @@ function Welcome() {
                 <div className="md:w-1/2 pl-10">
                   <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/80 shadow-xl">
                     <img
-                      src="https://images.unsplash.com/photo-1432821596592-e2c18b78144f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2VjdXJlJTIwbG9naW58ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60"
+                      src="/internet-identity-hero.webp"
                       alt="Secure login screen"
                       className="w-full h-48 object-cover rounded-2xl mb-3"
                     />
@@ -933,6 +933,12 @@ function Welcome() {
                   </p>
                 </div>
 
+                <div className="md:w-20 flex justify-center">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xl shadow-xl border-4 border-white z-10">
+                    2
+                  </div>
+                </div>
+
                 <div className="md:w-1/2 pl-10 md:order-1">
                   <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/80 shadow-xl">
                     <div className="flex mb-4">
@@ -962,12 +968,6 @@ function Welcome() {
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <div className="md:w-20 flex justify-center">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xl shadow-xl border-4 border-white z-10">
-                    2
                   </div>
                 </div>
               </div>
