@@ -16,6 +16,7 @@
     "src/mentalCompanion_frontend"
   ],
   "dependencies": {
-    "@tailwindcss/forms": "^0.5.10"
+    "@tailwindcss/forms": "^0.5.10",
+    "recharts": "^2.15.3"
   }
 }
