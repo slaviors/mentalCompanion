@@ -933,12 +933,6 @@ function Welcome() {
                   </p>
                 </div>
 
-                <div className="md:w-20 flex justify-center">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xl shadow-xl border-4 border-white z-10">
-                    2
-                  </div>
-                </div>
-
                 <div className="md:w-1/2 pl-10 md:order-1">
                   <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/80 shadow-xl">
                     <div className="flex mb-4">
@@ -968,6 +962,12 @@ function Welcome() {
                         </p>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="md:w-20 flex justify-center">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xl shadow-xl border-4 border-white z-10">
+                    2
                   </div>
                 </div>
               </div>

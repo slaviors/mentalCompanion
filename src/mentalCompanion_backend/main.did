@@ -1,0 +1,45 @@
+type ChatSession = record {
+  createdAt : int;
+  id : nat;
+  messages : vec Message;
+  slug : text;
+  title : text;
+  updatedAt : int;
+};
+
+type JournalEntry = record {
+  content : text;
+  createdAt : int;
+  id : nat;
+  mood : text;
+  title : text;
+  userId : principal;
+};
+
+type Message = record {
+  content : text;
+  id : nat;
+  isUser : bool;
+  timestamp : int;
+};
+
+type UserProfile = record {
+  createdAt : int;
+  id : principal;
+  name : text;
+};
+
+service : {
+  createChatSession : (text) -> (variant { err : text; ok : ChatSession });
+  createJournalEntry : (text, text, text) -> (variant { err : text; ok : JournalEntry });
+  createProfile : (text) -> (variant { err : text; ok : UserProfile });
+  deleteJournalEntry : (nat) -> (variant { err : text; ok : null });
+  getChatSession : (nat) -> (variant { err : text; ok : ChatSession });
+  getChatSessionBySlug : (text) -> (variant { err : text; ok : ChatSession });
+  getChatSessions : () -> (vec ChatSession);
+  getJournalEntries : () -> (variant { err : text; ok : vec JournalEntry });
+  getProfile : () -> (variant { err : text; ok : UserProfile });
+  sendMessage : (nat, text) -> (variant { err : text; ok : ChatSession });
+  sendMessageBySlug : (text, text) -> (variant { err : text; ok : ChatSession });
+  updateJournalEntry : (nat, text, text, text) -> (variant { err : text; ok : JournalEntry });
+}

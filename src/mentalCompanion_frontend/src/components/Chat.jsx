@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 export default function ChatInterface() {
   const { actor } = useAuth();
-  const { chatId } = useParams();
+  const { chatSlug } = useParams();
   const [message, setMessage] = useState('');
   const [chatSession, setChatSession] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,17 +25,17 @@ export default function ChatInterface() {
     "Help me focus on positives"
   ]);
 
-  // Load chat history when component mounts or chatId changes
+  // Load chat history when component mounts or chatSlug changes
   useEffect(() => {
-    if (actor && chatId) {
+    if (actor && chatSlug) {
       fetchChatSession();
     }
-  }, [actor, chatId]);
+  }, [actor, chatSlug]);
 
   const fetchChatSession = async () => {
     setIsFetchingHistory(true);
     try {
-      const result = await actor.getChatSession(Number(chatId));
+      const result = await actor.getChatSessionBySlug(chatSlug);
       if ('ok' in result) {
         setChatSession(result.ok);
         
@@ -127,7 +127,7 @@ export default function ChatInterface() {
     setTimeout(() => setTypingIndicator(true), 500);
 
     try {
-      const result = await actor.sendMessage(Number(chatId), messageToSend);
+      const result = await actor.sendMessageBySlug(chatSlug, messageToSend);
       if ('ok' in result) {
         setChatSession(result.ok);
         generateSuggestions(result.ok.messages);
@@ -277,7 +277,7 @@ export default function ChatInterface() {
             </div>
             <p className="text-xl font-semibold text-teal-800 mb-2">Begin Your Wellness Journey</p>
             <p className="text-gray-600 max-w-sm">
-              Share what's on your mind, ask questions, or tell me how you're feeling. I'm here to listen and support your mental wellness.
+              Share what's on your mind, ask questions, or just talk about your day. I'm here to listen and support your mental wellness.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-2 max-w-md">
               {suggestions.map((suggestion, index) => (
