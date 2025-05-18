@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Resources() {
+  const [activeChallengeDay, setActiveChallengeDay] = useState(1);
+  
   // Dummy data untuk resource cards
   const resourceCategories = [
     {
@@ -119,6 +122,19 @@ export default function Resources() {
     }
   ];
 
+  // Array of challenge activities for 30-day challenge
+  const challengeActivities = [
+    "Take 5 minutes to write down three things you're grateful for today.",
+    "Practice deep breathing for 2 minutes whenever you feel stressed today.",
+    "Drink at least 8 glasses of water and note how it affects your mood.",
+    "Go for a 15-minute walk outside and observe nature.",
+    "Write down one negative thought and reframe it positively."
+  ];
+
+  const handleNextDay = () => {
+    setActiveChallengeDay(prev => (prev >= 30) ? 1 : prev + 1);
+  };
+
   return (
     <div className="min-h-full bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -148,12 +164,14 @@ export default function Resources() {
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6">
                 <div className="text-white text-xl font-medium mb-4">Today's Activity</div>
                 <p className="text-white/90 mb-3">
-                  Take 5 minutes to write down three things you're grateful for today. Studies show that practicing gratitude
-                  can significantly improve mental wellbeing over time.
+                  {challengeActivities[activeChallengeDay % challengeActivities.length]}
                 </p>
                 <div className="flex justify-between items-center pt-3 border-t border-white/30">
-                  <span className="text-white/90">Day 1 of 30</span>
-                  <button className="text-white font-medium flex items-center hover:text-teal-100 transition-colors">
+                  <span className="text-white/90">Day {activeChallengeDay} of 30</span>
+                  <button 
+                    onClick={handleNextDay}
+                    className="text-white font-medium flex items-center hover:text-teal-100 transition-colors"
+                  >
                     Next Day
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -214,24 +232,72 @@ export default function Resources() {
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Online Support Groups</h3>
                 <p className="text-gray-600 mb-4">Join moderated support groups focused on specific mental health topics.</p>
-                <button className="text-teal-600 font-medium flex items-center hover:text-purple-600 transition-colors">
-                  Browse groups
+                <Link to="/chat" className="text-teal-600 font-medium flex items-center hover:text-purple-600 transition-colors">
+                  Connect with others
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                </button>
+                </Link>
               </div>
               
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Peer Support Network</h3>
                 <p className="text-gray-600 mb-4">Connect one-on-one with trained peer supporters who have lived experience.</p>
-                <button className="text-teal-600 font-medium flex items-center hover:text-purple-600 transition-colors">
+                <Link to="/chat" className="text-teal-600 font-medium flex items-center hover:text-purple-600 transition-colors">
                   Find a peer supporter
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                </button>
+                </Link>
               </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* New: Latest Updates Section */}
+        <div className="mt-12 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Latest Updates</h2>
+            <p className="text-gray-600 mb-4">Stay informed with the latest mental health news and app updates.</p>
+            
+            <div className="border-t border-gray-200 -mx-6 px-6 py-4">
+              <div className="flex items-start">
+                <div className="rounded-full bg-teal-100 p-2 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-md font-medium text-gray-900">New Mindfulness Features Added</h3>
+                  <p className="text-gray-600 text-sm mt-1">
+                    We've added guided breathing exercises and meditation timers to help you practice mindfulness daily.
+                  </p>
+                  <p className="text-gray-500 text-xs mt-2">May 15, 2025</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-200 -mx-6 px-6 py-4">
+              <div className="flex items-start">
+                <div className="rounded-full bg-purple-100 p-2 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-md font-medium text-gray-900">New Journal Template: Stress Reflection</h3>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Try our new guided journal template to help identify and manage stress triggers in your daily life.
+                  </p>
+                  <p className="text-gray-500 text-xs mt-2">May 10, 2025</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center mt-4">
+              <button className="text-teal-600 hover:text-teal-800 text-sm font-medium">
+                View all updates
+              </button>
             </div>
           </div>
         </div>
@@ -239,6 +305,7 @@ export default function Resources() {
         {/* Disclaimer */}
         <div className="mt-12 bg-yellow-50 rounded-lg p-4 text-yellow-800 text-sm border border-yellow-200">
           <p><strong>Disclaimer:</strong> The resources provided here are for informational purposes only and are not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+          <p className="mt-2 text-xs text-yellow-700">Last updated: May 18, 2025 - User: mamatqurtifa</p>
         </div>
       </div>
     </div>

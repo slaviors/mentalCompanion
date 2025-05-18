@@ -117,7 +117,8 @@ export default function Layout({ children }) {
   // Navigation items
   const navItems = [
     { name: 'Dashboard', path: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-    { name: 'Chats', path: '/chats', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
+    // PERBAIKAN: Mengubah path dari /chats ke /chat
+    { name: 'Chats', path: '/chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
     { name: 'Journal', path: '/journal', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
     { name: 'Resources', path: '/resources', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
     { name: 'Settings', path: '/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
@@ -132,6 +133,19 @@ export default function Layout({ children }) {
   const renderCreatedAt = () => {
     if (!userProfile?.createdAt) return 'Unknown';
     return formatTimestamp(userProfile.createdAt);
+  };
+
+  // Tambahkan informasi waktu saat ini dengan format yang diinginkan
+  const getCurrentUTCTime = () => {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
+    const hours = String(now.getUTCHours()).padStart(2, '0');
+    const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
   return (
@@ -232,8 +246,7 @@ export default function Layout({ children }) {
                   {/* Dropdown menu with animation */}
                   {isDropdownOpen && (
                     <div 
-                      className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50" 
-                      style={fadeInAnimation}
+                      className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-fade-in" 
                     >
                       <div className="px-4 py-3 text-sm text-gray-700 border-b">
                         <p className="font-medium text-gray-900">{userProfile.name}</p>
@@ -442,7 +455,7 @@ export default function Layout({ children }) {
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline">Current User: mamatqurtifa</span>
               <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline">{new Date().toLocaleDateString()}</span>
+              <span className="hidden sm:inline">{getCurrentUTCTime()}</span>
             </div>
             <div className="flex flex-wrap justify-center sm:justify-end space-x-4">
               <a href="#" className="text-gray-400 hover:text-teal-500 transition-colors text-sm">Privacy Policy</a>
@@ -455,7 +468,7 @@ export default function Layout({ children }) {
 
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" style={fadeInAnimation}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
             <div className="bg-gradient-to-r from-teal-500 to-purple-500 px-6 py-4">
               <h3 className="text-lg font-medium text-white">Confirm Sign Out</h3>
@@ -491,18 +504,6 @@ export default function Layout({ children }) {
           </div>
         </div>
       )}
-
-      {/* Keyframes in CSS file instead of inline style tags */}
-      {/* 
-        Add this to your CSS file:
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.2s ease-out forwards;
-        }
-      */}
     </div>
   );
 }

@@ -10,13 +10,21 @@ import Layout from "./components/Layout";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import CreateProfile from "./pages/CreateProfile";
-import ChatList from "./pages/ChatList";
 import ChatPage from "./pages/ChatPage";
 import Settings from "./pages/Settings";
-import Journal from "./pages/Journal";
+import JournalPage from "./pages/JournalPage";
 import Resources from "./pages/Resources";
 import ProfilePage from "./pages/ProfilePage";
 import Dashboard from "./pages/Dashboard";
+import MoodTrackingPage from "./pages/MoodTrackingPage";
+import GoalsPage from "./pages/GoalsPage";
+
+// Konstanta untuk tanggal dan user saat ini
+const APP_INFO = {
+  CURRENT_USER: 'mamatqurtifa',
+  CURRENT_DATE: '2025-05-18 02:34:54',
+  VERSION: '1.0.0'
+};
 
 // Komponen loading yang lebih menarik secara visual
 const LoadingScreen = () => (
@@ -43,6 +51,10 @@ const LoadingScreen = () => (
           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
         ></path>
       </svg>
+    </div>
+    <div className="mt-4 text-sm text-center text-teal-600">
+      <p>Loading Mental Health Companion</p>
+      <p className="text-xs text-gray-500 mt-1">{APP_INFO.CURRENT_DATE}</p>
     </div>
   </div>
 );
@@ -79,9 +91,9 @@ const ProfileRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Jika sudah punya profil, redirect ke chats
+  // Jika sudah punya profil, redirect ke dashboard
   if (userProfile) {
-    return <Navigate to="/chats" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -100,8 +112,8 @@ const AuthRoute = ({ children }) => {
     if (!userProfile) {
       return <Navigate to="/create-profile" replace />;
     }
-    // Jika sudah punya profil, arahkan ke chats
-    return <Navigate to="/chats" replace />;
+    // Jika sudah punya profil, arahkan ke dashboard
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -135,19 +147,30 @@ function AppContent() {
 
         {/* Main Application Routes */}
         <Route
-          path="/chats"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Layout>
-                <ChatList />
+                <Dashboard />
               </Layout>
             </ProtectedRoute>
           }
         />
 
-        {/* Chat Detail Route (with numeric ID) */}
+        {/* Chat Routes - Updated */}
         <Route
-          path="/chat/:chatSlug"
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ChatPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chat/:id"
           element={
             <ProtectedRoute>
               <Layout>
@@ -163,30 +186,6 @@ function AppContent() {
             <ProtectedRoute>
               <Layout>
                 <ProfilePage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Dashboard />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Alternative format for numeric ID with 'c' prefix
-            This allows URLs like /chat/c123 which look nicer */}
-        <Route
-          path="/chat/c:chatSlug"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <ChatPage />
               </Layout>
             </ProtectedRoute>
           }
@@ -210,7 +209,31 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Layout>
-                <Journal />
+                <JournalPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Mood Tracking Route */}
+        <Route
+          path="/mood"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <MoodTrackingPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Goals Route */}
+        <Route
+          path="/goals"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <GoalsPage />
               </Layout>
             </ProtectedRoute>
           }
@@ -223,6 +246,23 @@ function AppContent() {
             <ProtectedRoute>
               <Layout>
                 <Resources />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Legacy Routes - Redirect to new paths */}
+        <Route
+          path="/chats"
+          element={<Navigate to="/chat" replace />}
+        />
+
+        <Route
+          path="/chat/:chatSlug"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ChatPage />
               </Layout>
             </ProtectedRoute>
           }

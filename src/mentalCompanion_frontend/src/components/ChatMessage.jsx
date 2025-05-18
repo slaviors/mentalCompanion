@@ -9,7 +9,17 @@ export default function ChatMessage({ message }) {
     
     try {
       // Konversi BigInt ke number dengan membagi dengan 1_000_000 (nanosekon ke milisekon)
-      const timestampMs = Number(timestamp.toString()) / 1_000_000;
+      let timestampMs;
+      
+      if (typeof timestamp === 'bigint') {
+        timestampMs = Number(timestamp.toString()) / 1_000_000;
+      } else if (typeof timestamp === 'string' && timestamp.includes('T')) {
+        // Jika sudah dalam format ISO string, pakai langsung
+        return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else {
+        timestampMs = Number(timestamp) / 1_000_000;
+      }
+      
       return new Date(timestampMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
       console.error('Error formatting timestamp:', error);
@@ -119,8 +129,9 @@ export default function ChatMessage({ message }) {
       {/* Avatar for user messages */}
       {isUser && (
         <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex-shrink-0 ml-2 flex items-center justify-center text-sm font-medium text-gray-700">
-          {/* Anda bisa ganti ini dengan inisial pengguna atau foto profil */}
-          U
+          {/* Menampilkan inisial pengguna yang sedang login */}
+          {/* Gunakan inisial dari konteks pengguna jika tersedia */}
+          M
         </div>
       )}
     </div>

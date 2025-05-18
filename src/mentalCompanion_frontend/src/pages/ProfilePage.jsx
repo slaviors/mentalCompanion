@@ -2,27 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-// Fungsi helper untuk format tanggal dari BigInt
-const formatTimestamp = (timestamp) => {
-  if (!timestamp) return '';
+// Fungsi helper untuk format tanggal dari Date
+const formatDate = (date) => {
+  if (!date) return 'Unknown date';
   
   try {
-    // Jika timestamp adalah BigInt, konversi dengan aman
-    let timestampMs;
-    if (typeof timestamp === 'bigint') {
-      // Konversi BigInt ke string terlebih dahulu, lalu ke number
-      timestampMs = Number(timestamp.toString()) / 1_000_000;
-    } else {
-      timestampMs = Number(timestamp) / 1_000_000;
-    }
-    
-    const date = new Date(timestampMs);
-    
-    // Validasi date
-    if (isNaN(date.getTime())) {
-      return 'Invalid date';
-    }
-    
     // Format date
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -30,7 +14,7 @@ const formatTimestamp = (timestamp) => {
       day: 'numeric'
     }).format(date);
   } catch (error) {
-    console.error('Error formatting timestamp:', error);
+    console.error('Error formatting date:', error);
     return 'Unknown date';
   }
 };
@@ -54,14 +38,14 @@ export default function ProfilePage() {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   
-  // Redirect if not authenticated
+  // Redirect jika tidak terotentikasi
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       navigate('/login', { state: { from: '/profile' } });
     }
   }, [isAuthenticated, isLoading, navigate]);
   
-  // Initialize form data from user profile
+  // Inisialisasi form data dari user profile
   useEffect(() => {
     if (userProfile) {
       setFormData({
@@ -108,9 +92,6 @@ export default function ProfilePage() {
     setSuccessMessage('');
     
     try {
-      // Simulate API call to update profile
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       // Call the actual update function from AuthContext
       if (updateUserProfile) {
         await updateUserProfile(formData);
@@ -222,7 +203,7 @@ export default function ProfilePage() {
               
               <div className="mt-4 sm:mt-0 text-center sm:text-left flex-1">
                 <h2 className="text-xl font-bold text-gray-900">{userProfile?.name || 'User'}</h2>
-                <p className="text-sm text-gray-500">Member since {userProfile?.createdAt ? formatTimestamp(userProfile.createdAt) : 'Unknown'}</p>
+                <p className="text-sm text-gray-500">Member since {userProfile?.createdAt ? formatDate(userProfile.createdAt) : 'Unknown'}</p>
               </div>
               
               {!editMode && (
@@ -394,7 +375,7 @@ export default function ProfilePage() {
                     <div className="mt-4 space-y-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Current user:</p>
-                        <p className="mt-1 text-gray-900">mamatqurtifa</p>
+                        <p className="mt-1 text-gray-900">{principal?.toString() || 'Unknown'}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Last login:</p>
@@ -456,8 +437,8 @@ export default function ProfilePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h4 className="text-lg font-medium text-gray-900">12</h4>
-                <p className="text-sm text-gray-500">Conversations</p>
+                <h4 className="text-lg font-medium text-gray-900">{moodRecords.length || 0}</h4>
+                <p className="text-sm text-gray-500">Mood Records</p>
               </div>
             </div>
           </div>
@@ -470,7 +451,7 @@ export default function ProfilePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h4 className="text-lg font-medium text-gray-900">8</h4>
+                <h4 className="text-lg font-medium text-gray-900">{journalEntries.length || 0}</h4>
                 <p className="text-sm text-gray-500">Journal Entries</p>
               </div>
             </div>
@@ -484,7 +465,7 @@ export default function ProfilePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h4 className="text-lg font-medium text-gray-900">68%</h4>
+                <h4 className="text-lg font-medium text-gray-900">{wellnessScore}%</h4>
                 <p className="text-sm text-gray-500">Wellbeing Score</p>
               </div>
             </div>

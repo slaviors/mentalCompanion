@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ChatMessage from './ChatMessage';
-import { useNavigate, useParams } from 'react-router-dom';
 
-export default function ChatInterface() {
+// Diubah: menghapus useParams, menerima chatId sebagai prop
+export default function Chat({ 
+  chatId, 
+  chatData, 
+  onMessageSent = () => {}, 
+  showBack = false, 
+  onBack = () => {} 
+}) {
   const { actor } = useAuth();
-  const { chatSlug } = useParams();
   const [message, setMessage] = useState('');
   const [chatSession, setChatSession] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,7 +20,6 @@ export default function ChatInterface() {
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
-  const navigate = useNavigate();
 
   // Suggested responses based on context
   const [suggestions, setSuggestions] = useState([
@@ -25,17 +29,25 @@ export default function ChatInterface() {
     "Help me focus on positives"
   ]);
 
-  // Load chat history when component mounts or chatSlug changes
+  // Diubah: Gunakan chatData jika tersedia, atau ambil dari chatId
   useEffect(() => {
-    if (actor && chatSlug) {
+    if (chatData) {
+      setChatSession(chatData);
+      setIsFetchingHistory(false);
+      if (chatData.messages && chatData.messages.length > 0) {
+        generateSuggestions(chatData.messages);
+      }
+    } else if (actor && chatId) {
       fetchChatSession();
     }
-  }, [actor, chatSlug]);
+  }, [actor, chatId, chatData]);
 
+  // Diubah: Sesuaikan fetch untuk menggunakan ID bukan slug
   const fetchChatSession = async () => {
     setIsFetchingHistory(true);
     try {
-      const result = await actor.getChatSessionBySlug(chatSlug);
+      // Diubah: Gunakan getChatSession dengan ID numerik
+      const result = await actor.getChatSession(Number(chatId));
       if ('ok' in result) {
         setChatSession(result.ok);
         
@@ -44,7 +56,8 @@ export default function ChatInterface() {
           generateSuggestions(result.ok.messages);
         }
       } else {
-        navigate('/chats');
+        // Diubah: Gunakan callback onBack alih-alih navigate
+        onBack();
         setErrorMsg('Chat session not found');
       }
     } catch (error) {
@@ -99,6 +112,7 @@ export default function ChatInterface() {
     }
   }, [chatSession?.messages, isFetchingHistory]);
 
+  // Diubah: Tambahkan parameter ID chat ke sendMessage
   const handleSendMessage = async (e) => {
     e?.preventDefault();
     if (!message.trim() || loading) return;
@@ -127,10 +141,13 @@ export default function ChatInterface() {
     setTimeout(() => setTypingIndicator(true), 500);
 
     try {
-      const result = await actor.sendMessageBySlug(chatSlug, messageToSend);
+      // Diubah: Gunakan sendMessage dengan ID numerik alih-alih slug
+      const result = await actor.sendMessage(Number(chatId), messageToSend);
       if ('ok' in result) {
         setChatSession(result.ok);
         generateSuggestions(result.ok.messages);
+        // Notify parent component about the new message
+        onMessageSent(result.ok);
       } else {
         setErrorMsg('Failed to send message');
       }
@@ -190,7 +207,7 @@ export default function ChatInterface() {
           </div>
           <p className="text-red-700 mb-4">{errorMsg}</p>
           <button 
-            onClick={() => navigate('/chats')}
+            onClick={onBack}
             className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
           >
             Return to Chats
@@ -205,14 +222,16 @@ export default function ChatInterface() {
       {/* Chat Header */}
       <div className="bg-white shadow-sm py-3 px-4 border-b flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center">
-          <button 
-            onClick={() => navigate('/chats')}
-            className="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+          {showBack && (
+            <button 
+              onClick={onBack}
+              className="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
           <div>
             <h2 className="text-xl font-semibold text-gray-800 flex items-center">
               {chatSession?.title}
@@ -436,8 +455,6 @@ export default function ChatInterface() {
         <div className="flex justify-between mt-2 px-2">
           <div className="flex space-x-1 text-xs text-gray-500">
             <span>© {new Date().getFullYear()} Mental Health Companion</span>
-            <span>•</span>
-            <span>User: mamatqurtifa</span>
           </div>
           <div className="text-xs text-gray-400">
             {new Date().toLocaleString()}

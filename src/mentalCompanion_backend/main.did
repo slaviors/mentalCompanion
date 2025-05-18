@@ -1,45 +1,103 @@
-type ChatSession = record {
-  createdAt : int;
-  id : nat;
-  messages : vec Message;
-  slug : text;
-  title : text;
-  updatedAt : int;
+type UserPreferences = record {
+  notifications : bool;
+  theme : text;
+  language : text;
 };
 
-type JournalEntry = record {
-  content : text;
+type UserProfile = record {
+  id : principal;
+  name : text;
+  bio : opt text;
+  email : opt text;
   createdAt : int;
-  id : nat;
-  mood : text;
-  title : text;
-  userId : principal;
+  preferences : opt UserPreferences;
 };
 
 type Message = record {
-  content : text;
   id : nat;
+  content : text;
   isUser : bool;
   timestamp : int;
 };
 
-type UserProfile = record {
+type ChatSession = record {
+  id : nat;
+  slug : text;
+  title : text;
+  messages : vec Message;
   createdAt : int;
-  id : principal;
-  name : text;
+  updatedAt : int;
+};
+
+type JournalEntry = record {
+  id : nat;
+  title : text;
+  content : text;
+  mood : text;
+  createdAt : int;
+  userId : principal;
+};
+
+type MoodRecord = record {
+  id : nat;
+  date : int;
+  happiness : nat;
+  anxiety : nat;
+  energy : nat;
+  focus : nat;
+  notes : opt text;
+  userId : principal;
+};
+
+type Goal = record {
+  id : nat;
+  title : text;
+  completed : bool;
+  createdAt : int;
+  completedAt : opt int;
+  userId : principal;
+};
+
+type Error = variant {
+  NotFound : text;
+  AlreadyExists : text;
+  NotAuthorized : text;
+  InvalidInput : text;
+};
+
+type Result<T, E> = variant {
+  ok : T;
+  err : E;
 };
 
 service : {
-  createChatSession : (text) -> (variant { err : text; ok : ChatSession });
-  createJournalEntry : (text, text, text) -> (variant { err : text; ok : JournalEntry });
-  createProfile : (text) -> (variant { err : text; ok : UserProfile });
-  deleteJournalEntry : (nat) -> (variant { err : text; ok : null });
-  getChatSession : (nat) -> (variant { err : text; ok : ChatSession });
-  getChatSessionBySlug : (text) -> (variant { err : text; ok : ChatSession });
+  // Profile endpoints
+  createProfile : (name : text) -> (Result<UserProfile, text>);
+  getProfile : () -> (Result<UserProfile, text>);
+  updateProfile : (name : text, bio : opt text, email : opt text, preferences : opt UserPreferences) -> (Result<UserProfile, text>);
+
+  // Chat endpoints
+  createChatSession : (title : text) -> (Result<ChatSession, text>);
   getChatSessions : () -> (vec ChatSession);
-  getJournalEntries : () -> (variant { err : text; ok : vec JournalEntry });
-  getProfile : () -> (variant { err : text; ok : UserProfile });
-  sendMessage : (nat, text) -> (variant { err : text; ok : ChatSession });
-  sendMessageBySlug : (text, text) -> (variant { err : text; ok : ChatSession });
-  updateJournalEntry : (nat, text, text, text) -> (variant { err : text; ok : JournalEntry });
+  getChatSession : (chatId : nat) -> (Result<ChatSession, text>);
+  getChatSessionBySlug : (slug : text) -> (Result<ChatSession, text>);
+  sendMessage : (chatId : nat, content : text) -> (Result<ChatSession, text>);
+
+  // Journal endpoints
+  createJournalEntry : (title : text, content : text, mood : text) -> (Result<JournalEntry, text>);
+  getJournalEntries : () -> (Result<vec JournalEntry, text>);
+  updateJournalEntry : (entryId : nat, title : text, content : text, mood : text) -> (Result<JournalEntry, text>);
+  deleteJournalEntry : (entryId : nat) -> (Result<(), text>);
+
+  // Mood tracking endpoints
+  recordMood : (happiness : nat, anxiety : nat, energy : nat, focus : nat, notes : opt text) -> (Result<MoodRecord, text>);
+  getMoodRecords : () -> (Result<vec MoodRecord, text>);
+
+  // Goals endpoints
+  createGoal : (title : text) -> (Result<Goal, text>);
+  getGoals : () -> (Result<vec Goal, text>);
+  updateGoalStatus : (goalId : nat, completed : bool) -> (Result<Goal, text>);
+
+  // Dashboard metrics
+  getWellnessScore : () -> (nat) query;
 }

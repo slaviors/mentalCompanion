@@ -46,4 +46,23 @@ body {
   backdrop-filter: blur(8px);
 }
 
-/* Current Date & User Info: 2025-05-12 04:19:34 | mamatqurtifa */
+/* Tambahkan ke file index.css atau index.scss */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Untuk animasi pulsa lambat yang digunakan di beberapa tempat */
+@keyframes pulse-slow {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite ease-in-out;
+}

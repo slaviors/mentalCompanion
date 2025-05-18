@@ -124,7 +124,14 @@ export const AuthProvider = ({ children }) => {
       console.log("Profile result:", result);
 
       if ("ok" in result) {
-        setUserProfile(result.ok);
+        // Memproses data profil jika diterima
+        const profile = result.ok;
+        setUserProfile({
+          ...profile,
+          // Convert BigInt timestamp ke format Date yang bisa di-render
+          createdAt: typeof profile.createdAt === 'bigint' ? 
+            Number(profile.createdAt) / 1_000_000 : profile.createdAt
+        });
       } else {
         // Tidak ada profil ditemukan, tetapi tidak perlu menampilkan error
         setUserProfile(null);
@@ -240,19 +247,20 @@ export const AuthProvider = ({ children }) => {
     try {
       // Log untuk debugging
       console.log("Creating profile with name:", name);
-      console.log("Actor instance:", actor);
       console.log("Using principal:", principal?.toString());
-
-      // Tambahkan timestamp untuk memastikan request unik
-      const timestamp = new Date().toISOString();
-      console.log("Request timestamp:", timestamp);
 
       // Memanggil fungsi createProfile di backend
       const result = await actor.createProfile(name);
 
       if ("ok" in result) {
         // Profile berhasil dibuat, update state
-        setUserProfile(result.ok);
+        const profile = result.ok;
+        setUserProfile({
+          ...profile,
+          // Convert BigInt timestamp ke format Date yang bisa di-render
+          createdAt: typeof profile.createdAt === 'bigint' ? 
+            Number(profile.createdAt) / 1_000_000 : profile.createdAt
+        });
         return true;
       } else {
         console.error("Failed to create profile:", result.err);
@@ -264,6 +272,65 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Fungsi untuk memperbarui profil pengguna
+  const updateUserProfile = async (profileData) => {
+    if (!actor) {
+      throw new Error("Actor not initialized. Please login first.");
+    }
+
+    try {
+      console.log("Updating profile:", profileData);
+
+      // Destructuring data profil untuk memisahkan field-field yang dibutuhkan
+      const { name, bio, email, preferences } = profileData;
+
+      // Memanggil fungsi updateProfile di backend
+      const result = await actor.updateProfile(
+        name,
+        bio ? [bio] : [], // Konversi ke optional value Motoko
+        email ? [email] : [], // Konversi ke optional value Motoko
+        preferences ? [preferences] : [] // Konversi ke optional value Motoko
+      );
+
+      if ("ok" in result) {
+        // Profile berhasil diperbarui, update state
+        const updatedProfile = result.ok;
+        setUserProfile({
+          ...updatedProfile,
+          // Convert BigInt timestamp ke format Date yang bisa di-render
+          createdAt: typeof updatedProfile.createdAt === 'bigint' ? 
+            Number(updatedProfile.createdAt) / 1_000_000 : updatedProfile.createdAt
+        });
+        return true;
+      } else {
+        console.error("Failed to update profile:", result.err);
+        return false;
+      }
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      throw error;
+    }
+  };
+
+  // Fungsi untuk memformat data profil dari backend
+  const formatProfileData = (backendProfile) => {
+    if (!backendProfile) return null;
+
+    return {
+      ...backendProfile,
+      // Convert BigInt timestamp ke Date
+      createdAt: typeof backendProfile.createdAt === 'bigint' 
+        ? Number(backendProfile.createdAt) / 1_000_000 
+        : backendProfile.createdAt,
+      // Pastikan preferences ada
+      preferences: backendProfile.preferences?.[0] || {
+        notifications: false,
+        theme: 'light',
+        language: 'en'
+      }
+    };
+  };
+
   // Menyediakan nilai context untuk komponen child
   const contextValue = {
     isAuthenticated,
@@ -271,10 +338,11 @@ export const AuthProvider = ({ children }) => {
     principal,
     actor,
     isLoading,
-    userProfile,
+    userProfile: formatProfileData(userProfile),
     login,
     logout,
     createProfile,
+    updateUserProfile,
     loginError,
     isPlayground,
   };
